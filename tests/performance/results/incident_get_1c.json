@@ -1,0 +1,30 @@
+[
+  {
+    "timestamp": "2026-09-18T08:00:20.768334+00:00",
+    "environment": "local",
+    "test_name": "incident_get_1c",
+    "base_url": "http://localhost:3000",
+    "node_version": "",
+    "git_commit": "88cb79f",
+    "count": 10,
+    "p50": 8622.116700000333,
+    "p95": 9132.92282000075,
+    "p99": 9143.159204001786,
+    "min": 8233.38270000022,
+    "max": 9145.718300002045,
+    "avg": 8679.978520000077,
+    "stdev": 292.47567780603543,
+    "concurrency": 1,
+    "total_requests": 10,
+    "successes": 10,
+    "failures": 0,
+    "wall_time_s": 87.54979530000128,
+    "throughput_rps": 0.11422071251832903,
+    "status_counts": {
+      "200": 10
+    },
+    "sample_errors": [],
+    "path": "/api/incidents/perf-manual-4a2b2b",
+    "scenario": "incident_get_1c_10r"
+  }
+]

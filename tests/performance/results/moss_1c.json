@@ -28,5 +28,35 @@
     "query": "oil spill Arabian Sea SAR detection",
     "scenario": "moss_1c_10r",
     "moss_query": "oil spill Arabian Sea SAR detection"
+  },
+  {
+    "timestamp": "2026-09-18T07:53:03.236597+00:00",
+    "environment": "local",
+    "test_name": "moss_1c",
+    "base_url": "http://localhost:3000",
+    "node_version": "",
+    "git_commit": "88cb79f",
+    "count": 10,
+    "p50": 47.09374999947613,
+    "p95": 190.58765499958074,
+    "p99": 277.4060110006031,
+    "min": 35.74490000028163,
+    "max": 299.11060000085854,
+    "avg": 71.30831999893417,
+    "stdev": 76.11742347671475,
+    "concurrency": 1,
+    "total_requests": 10,
+    "successes": 10,
+    "failures": 0,
+    "wall_time_s": 1.6700736000020697,
+    "throughput_rps": 5.987760060387522,
+    "status_counts": {
+      "200": 10
+    },
+    "sample_errors": [],
+    "path": "/api/moss/search",
+    "query": "oil spill Arabian Sea SAR detection",
+    "scenario": "moss_1c_10r",
+    "moss_query": "oil spill Arabian Sea SAR detection"
   }
 ]

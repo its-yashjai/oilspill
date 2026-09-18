@@ -16,5 +16,23 @@
     "stdev": 7.823979550075523,
     "type": "moss_retrieval_latency",
     "note": "Moss retrieval latency separate from end-to-end"
+  },
+  {
+    "timestamp": "2026-09-18T07:53:12.005152+00:00",
+    "environment": "local",
+    "test_name": "moss_varied_moss",
+    "base_url": "http://localhost:3000",
+    "node_version": "",
+    "git_commit": "88cb79f",
+    "count": 5,
+    "p50": 21.08,
+    "p95": 25.473999999999997,
+    "p99": 26.2068,
+    "min": 12.03,
+    "max": 26.39,
+    "avg": 19.722,
+    "stdev": 4.81038626307701,
+    "type": "moss_retrieval_latency",
+    "note": "Moss retrieval latency separate from end-to-end"
   }
 ]

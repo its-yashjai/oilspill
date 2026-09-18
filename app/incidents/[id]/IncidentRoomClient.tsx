@@ -179,8 +179,8 @@ export function IncidentRoomClient({ initialData }: IncidentRoomClientProps) {
       });
       const data = await res.json();
       if (data.observation) {
-        setObservations((prev: any[]) => [...prev, data.observation]);
-        setTimeline((prev: any[]) => [...prev, data.timeline]);
+        setObservations((prev: any[]) => prev.some(o => o.id === data.observation.id) ? prev : [...prev, data.observation]);
+        setTimeline((prev: any[]) => prev.some(t => t.id === data.timeline.id) ? prev : [...prev, data.timeline]);
         setIncident((prev: any) => ({ ...prev, contextVersion: data.contextVersion }));
         setContextVersions((prev: any[]) => [...prev, data.context]);
         
@@ -210,7 +210,7 @@ export function IncidentRoomClient({ initialData }: IncidentRoomClientProps) {
           status: data.incidentStatus || prev.status,
           decisions: [...(prev.decisions || []), data.decision]
         }));
-        setTimeline((prev: any[]) => [...prev, data.timeline]);
+        setTimeline((prev: any[]) => prev.some(t => t.id === data.timeline.id) ? prev : [...prev, data.timeline]);
       }
     } catch (e) {
       console.error("Failed to make decision:", e);
@@ -311,14 +311,14 @@ export function IncidentRoomClient({ initialData }: IncidentRoomClientProps) {
         liveKitConnected={liveKitConnected}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 p-4">
-        <div className="lg:col-span-3 space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 items-start min-h-0">
+        <div className="lg:col-span-3 space-y-4 min-h-0 min-w-0">
           <TimelinePanel timeline={timeline} />
         </div>
 
-        <div className="lg:col-span-6 space-y-4">
+        <div className="lg:col-span-6 space-y-4 min-h-0 min-w-0 flex flex-col">
           {/* LIVE World Map - renders immediately, satellite overlays async, geographic footprint */}
-          <div className="rounded-xl overflow-hidden border border-white/10 h-[380px] lg:h-[520px] min-h-[320px]">
+          <div className="relative w-full rounded-xl overflow-hidden border border-white/10 h-[380px] lg:h-[520px] min-h-[320px] min-h-0 shrink-0 block">
             <LiveWorldMap
               incidentId={incident.id}
               currentObservation={currentObservation}
@@ -360,7 +360,7 @@ export function IncidentRoomClient({ initialData }: IncidentRoomClientProps) {
           </div>
         </div>
 
-        <div className="lg:col-span-3 space-y-4">
+        <div className="lg:col-span-3 space-y-4 min-h-0 min-w-0">
           <CollaborativeAIPanel 
             findings={findings}
             mossMetrics={{ totalLatencyMs: totalMossLatency, queryCount: totalQueries, resultCount: totalResults }}

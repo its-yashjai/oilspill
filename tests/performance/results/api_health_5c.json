@@ -26,5 +26,33 @@
     "sample_errors": [],
     "path": "/api/health",
     "scenario": "health_5c_30r"
+  },
+  {
+    "timestamp": "2026-09-18T07:52:34.696197+00:00",
+    "environment": "local",
+    "test_name": "api_health_5c",
+    "base_url": "http://localhost:3000",
+    "node_version": "",
+    "git_commit": "88cb79f",
+    "count": 30,
+    "p50": 274.9960500004818,
+    "p95": 2345.0192749987764,
+    "p99": 2367.2517770000923,
+    "min": 241.53569999907631,
+    "max": 2369.507600000361,
+    "avg": 563.7567266669066,
+    "stdev": 694.9176055755455,
+    "concurrency": 5,
+    "total_requests": 30,
+    "successes": 30,
+    "failures": 0,
+    "wall_time_s": 4.448028999999224,
+    "throughput_rps": 6.744560343470161,
+    "status_counts": {
+      "200": 30
+    },
+    "sample_errors": [],
+    "path": "/api/health",
+    "scenario": "health_5c_30r"
   }
 ]

@@ -23,5 +23,30 @@
     "warm_ms": 7986.933400000453,
     "path": "/api/incidents (DEMO)",
     "note": "Includes DEMO detection + persistence, no LIVE external call"
+  },
+  {
+    "timestamp": "2026-09-18T07:54:33.640321+00:00",
+    "environment": "local",
+    "test_name": "demo_incident_5c",
+    "base_url": "http://localhost:3000",
+    "node_version": "",
+    "git_commit": "88cb79f",
+    "count": 10,
+    "p50": 6581.030049999754,
+    "p95": 8347.043679999842,
+    "p99": 8359.124415999759,
+    "min": 6219.015200000285,
+    "max": 8362.144599999738,
+    "avg": 7151.074080000399,
+    "stdev": 905.2093044813996,
+    "concurrency": 5,
+    "total_requests": 10,
+    "successes": 10,
+    "failures": 0,
+    "wall_time_s": 15.017953499998839,
+    "throughput_rps": 0.665869687238063,
+    "warm_ms": 6382.270800000697,
+    "path": "/api/incidents (DEMO)",
+    "note": "Includes DEMO detection + persistence, no LIVE external call"
   }
 ]

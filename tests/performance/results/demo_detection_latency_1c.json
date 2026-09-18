@@ -15,5 +15,39 @@
     "avg": 166.4,
     "stdev": 21.987269043698902,
     "type": "detection_processingLatencyMs"
+  },
+  {
+    "timestamp": "2026-09-18T07:54:10.321771+00:00",
+    "environment": "local",
+    "test_name": "demo_detection_latency_1c",
+    "base_url": "http://localhost:3000",
+    "node_version": "",
+    "git_commit": "88cb79f",
+    "count": 5,
+    "p50": 148.0,
+    "p95": 178.0,
+    "p99": 181.20000000000002,
+    "min": 129.0,
+    "max": 182.0,
+    "avg": 152.0,
+    "stdev": 18.51485889765299,
+    "type": "detection_processingLatencyMs"
+  },
+  {
+    "timestamp": "2026-09-18T07:56:32.910377+00:00",
+    "environment": "local",
+    "test_name": "demo_detection_latency_1c",
+    "base_url": "http://localhost:3000",
+    "node_version": "",
+    "git_commit": "88cb79f",
+    "count": 5,
+    "p50": 166.0,
+    "p95": 179.8,
+    "p99": 179.95999999999998,
+    "min": 133.0,
+    "max": 180.0,
+    "avg": 159.2,
+    "stdev": 20.033971149025845,
+    "type": "detection_processingLatencyMs"
   }
 ]

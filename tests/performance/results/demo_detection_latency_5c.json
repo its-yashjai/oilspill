@@ -15,5 +15,22 @@
     "avg": 157.3,
     "stdev": 21.936499264923746,
     "type": "detection_processingLatencyMs"
+  },
+  {
+    "timestamp": "2026-09-18T07:54:33.561470+00:00",
+    "environment": "local",
+    "test_name": "demo_detection_latency_5c",
+    "base_url": "http://localhost:3000",
+    "node_version": "",
+    "git_commit": "88cb79f",
+    "count": 10,
+    "p50": 154.5,
+    "p95": 185.0,
+    "p99": 185.0,
+    "min": 139.0,
+    "max": 185.0,
+    "avg": 158.2,
+    "stdev": 15.236797563792727,
+    "type": "detection_processingLatencyMs"
   }
 ]

@@ -1,0 +1,2 @@
+timestamp,environment,test_name,base_url,node_version,git_commit,count,p50,p95,p99,min,max,avg,stdev,concurrency,total_requests,successes,failures,wall_time_s,throughput_rps,status_counts,sample_errors,path,scenario
+2026-09-18T08:00:20.768334+00:00,local,incident_get_1c,http://localhost:3000,,88cb79f,10,8622.116700000333,9132.92282000075,9143.159204001786,8233.38270000022,9145.718300002045,8679.978520000077,292.47567780603543,1,10,10,0,87.54979530000128,0.11422071251832903,"{""200"": 10}",[],/api/incidents/perf-manual-4a2b2b,incident_get_1c_10r

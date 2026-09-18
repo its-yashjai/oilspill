@@ -96,8 +96,16 @@ async function getOAuthToken(): Promise<string> {
   return cachedToken.token;
 }
 
+const EVALSCRIPT_VERSION = "v4-fix-time-ms-bright";
 export function getSarPreviewCacheKey(productId: string, acquiredAt: string, bbox: [number, number, number, number], role: string): string {
-  return `${productId}:${acquiredAt}:${bbox.join(",")}:${role}`;
+  return `${productId}:${acquiredAt}:${bbox.join(",")}:${role}:${EVALSCRIPT_VERSION}`;
+}
+// Normalize STAC datetime with fractional seconds (e.g. 2026-09-16T01:18:19.079828Z) to second precision for Process API.
+// Sentinel Hub dataFilter timeRange with ms can miss the product (returns uniform 0,20,15), while truncated to seconds returns proper varied image.
+function normalizeTimeForProcessApi(iso: string): string {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  return d.toISOString().replace(/\.\d+Z$/, "Z");
 }
 
 export async function renderSarPreviewBytes(params: {
@@ -115,23 +123,35 @@ export async function renderSarPreviewBytes(params: {
 
   const evalscript = `//VERSION=3
 function setup(){return{input:["VV","VH"],output:{bands:3, sampleType:"AUTO"}};}
-function toDb(x){ return x > 0 ? 10*Math.log10(x) : -30; }
+function toDb(x){ return x > 0.0001 ? 10*Math.log10(x) : -30; }
 function stretch(db){
-  // typical Sentinel-1 sea/land backscatter runs roughly -25dB to 0dB
-  return Math.max(0, Math.min(1, (db + 25) / 25));
+  // ocean-optimized v4: robust Sentinel-1 contrast stretch — sea ~ -18dB => 0.6, oil ~ -22dB => 0.34, land bright
+  // Ensures real tonal variation, not uniform black. Gamma lifts dark ocean to mid-grey.
+  let c = (db + 25) / 15;
+  c = Math.max(0, Math.min(1, c));
+  return Math.pow(c, 0.68);
 }
 function evaluatePixel(s){
   let v = stretch(toDb(s.VV));
   let h = stretch(toDb(s.VH));
-  let composite = (v * 0.7 + h * 0.3);
-  return [v, composite, h];
+  let r = Math.min(1, v * 1.08);
+  let g = Math.min(1, (v*0.55 + h*0.45) * 1.05 + 0.08);
+  let b = Math.min(1, h * 1.12 + 0.06);
+  return [r, g, b];
 }`;
-  const toTime = new Date(new Date(acquiredAt).getTime() + 24 * 3600 * 1000).toISOString();
+  // CRITICAL FIX: STAC datetime includes fractional seconds (e.g. .079828Z). Process API timeRange with ms returns
+  // uniform black (no data) — truncation to seconds returns proper varied 512x512. Use second-precision window
+  // with 5-min padding before acquisition to guarantee product inclusion.
+  const acquiredDate = new Date(acquiredAt);
+  const fromTime = normalizeTimeForProcessApi(new Date(acquiredDate.getTime() - 5*60*1000).toISOString());
+  const toTime = normalizeTimeForProcessApi(new Date(acquiredDate.getTime() + 24*3600*1000).toISOString());
+  // Log the time normalization for debugging (no secrets)
+  console.log(JSON.stringify({ event: "sarPreview request", productId, role, bbox, acquiredAt, fromTime, toTime, evalscriptVersion: EVALSCRIPT_VERSION }));
   const token = await getOAuthToken();
   const processBody = {
     input: {
       bounds: { bbox, properties: { crs: "http://www.opengis.net/def/crs/EPSG/0/4326" } },
-      data: [{ type: "S1GRD", dataFilter: { timeRange: { from: acquiredAt, to: toTime } }, processing: { orthorectify: true, demInstance: "COPERNICUS_30" } }],
+      data: [{ type: "S1GRD", dataFilter: { timeRange: { from: fromTime, to: toTime } }, processing: { orthorectify: true, demInstance: "COPERNICUS_30" } }],
     },
     output: { width: 512, height: 512, responses: [{ identifier: "default", format: { type: "image/png" } }] },
     evalscript,
@@ -153,6 +173,30 @@ function evaluatePixel(s){
   }
 
   const buf = Buffer.from(await pr.arrayBuffer());
+  const ct = pr.headers.get("content-type") || "";
+  console.log(JSON.stringify({ event: "sarPreview response", productId, role, status: pr.status, contentType: ct, byteLength: buf.length, isPng: buf.length>8 && buf[0]===0x89 }));
+  // Server-side pixel verification (instrumentation): decode PNG and log min/max/avg for debugging uniformity
+  try {
+    // Lazy load canvas only if available to avoid bundling issues
+    const { createCanvas, loadImage } = await import("canvas");
+    const tmpPath = join(process.cwd(), `.tmp_preview_${role}_${Date.now()}.png`);
+    // Write to temp and load to avoid Buffer confusion in some canvas versions - instead use data URL
+    const dataUrl = `data:image/png;base64,${buf.toString("base64")}`;
+    const img: any = await (loadImage as any)(dataUrl);
+    const canvas: any = (createCanvas as any)(img.width, img.height);
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+    const imageData = ctx.getImageData(0, 0, img.width, img.height).data;
+    let min=255, max=0, sum=0, n=img.width*img.height;
+    let minA=255, maxA=0, sumA=0;
+    for(let i=0;i<imageData.length;i+=4){ const r=imageData[i], g=imageData[i+1], b=imageData[i+2], a=imageData[i+3]; const lum = Math.round((r+g+b)/3); sum+=lum; min=Math.min(min,lum); max=Math.max(max,lum); sumA+=a; minA=Math.min(minA,a); maxA=Math.max(maxA,a); }
+    console.log(JSON.stringify({ event: "sarPreview pixel stats", productId, role, width: img.width, height: img.height, min, max, average: (sum/n).toFixed(2), alphaMin: minA, alphaMax: maxA, alphaAvg: (sumA/n).toFixed(2), byteLength: buf.length }));
+    if (min === max) {
+      console.warn(JSON.stringify({ event: "sarPreview uniform image WARNING", productId, role, min, max, average: (sum/n).toFixed(2) }));
+    }
+  } catch (e:any) {
+    console.warn(JSON.stringify({ event: "sarPreview pixel stats failed", productId, role, error: String(e?.message||e).slice(0,200) }));
+  }
 
 // Real validity check: correct PNG signature + reasonable minimum for a genuine (even low-contrast) 512x512 image.
 // Sentinel Hub returns a JSON error body (not a PNG) on real failures, so checking the PNG magic bytes

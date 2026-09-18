@@ -26,5 +26,33 @@
     "sample_errors": [],
     "path": "/api/health",
     "scenario": "health_8c_40r"
+  },
+  {
+    "timestamp": "2026-09-18T07:52:38.673273+00:00",
+    "environment": "local",
+    "test_name": "api_health_8c",
+    "base_url": "http://localhost:3000",
+    "node_version": "",
+    "git_commit": "88cb79f",
+    "count": 40,
+    "p50": 262.969699999303,
+    "p95": 2299.93145500066,
+    "p99": 2327.7736729983735,
+    "min": 242.5729999995383,
+    "max": 2344.917799997347,
+    "avg": 454.2942750000293,
+    "stdev": 539.6831817691051,
+    "concurrency": 8,
+    "total_requests": 40,
+    "successes": 40,
+    "failures": 0,
+    "wall_time_s": 3.5490920999982336,
+    "throughput_rps": 11.27048802143509,
+    "status_counts": {
+      "200": 40
+    },
+    "sample_errors": [],
+    "path": "/api/health",
+    "scenario": "health_8c_40r"
   }
 ]

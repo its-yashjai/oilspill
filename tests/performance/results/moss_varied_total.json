@@ -15,5 +15,22 @@
     "avg": 34.76004000003741,
     "stdev": 10.258877440007852,
     "type": "total_api_latency"
+  },
+  {
+    "timestamp": "2026-09-18T07:53:11.865236+00:00",
+    "environment": "local",
+    "test_name": "moss_varied_total",
+    "base_url": "http://localhost:3000",
+    "node_version": "",
+    "git_commit": "88cb79f",
+    "count": 5,
+    "p50": 46.55370000182302,
+    "p95": 64.51727999883587,
+    "p99": 65.63353599907714,
+    "min": 38.2473999998183,
+    "max": 65.91259999913746,
+    "avg": 50.10519999923417,
+    "stdev": 10.641899188241952,
+    "type": "total_api_latency"
   }
 ]

@@ -101,9 +101,10 @@ export class LiveSentinel1Provider implements SatelliteProvider {
 
     // Same-origin preview URL — browser will fetch from our server, which does OAuth + Process API server-side
     // Do NOT expose raw datahub asset URL or bearer token to browser
+    // v=4 busts browser/CDN cache after evalscript brightening fix
     let previewUrl: string | undefined;
     if (incidentId) {
-      previewUrl = `/api/incidents/${incidentId}/sar-preview/${role}`;
+      previewUrl = `/api/incidents/${incidentId}/sar-preview/${role}?v=4`;
     } else {
       // Fallback for callers without incidentId (should not happen for LIVE incidents, but keep for backward compat)
       // Use same-origin with placeholder — will be replaced when incident is created

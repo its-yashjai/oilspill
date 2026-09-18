@@ -138,16 +138,20 @@ export function ImageViewer({ detection, image, incident }: ImageViewerProps) {
     transition: "transform 0.1s ease-out",
   };
 
-  const containerStyle = {
-    width: "100%",
-    height: "100%",
-    overflow: "hidden",
+  // Bust browser cache for old LIVE incidents whose stored previewUrl lacks ?v=4 (dark evalscript); ensures fresh bright PNG
+  const getImageSrc = (url: string) => {
+    if (!url || typeof url !== "string") return url;
+    if (url.startsWith("/api/incidents") && url.includes("/sar-preview")) {
+      if (url.includes("v=4")) return url;
+      return url.includes("?") ? `${url}&v=4` : `${url}?v=4`;
+    }
+    return url;
   };
 
   return (
-    <div className="rounded-xl overflow-hidden border border-white/10 bg-slate-900">
+    <div className="relative w-full rounded-xl overflow-hidden border border-white/10 bg-slate-900 flex flex-col min-h-0 shrink-0">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-slate-800/50">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-slate-800/50 shrink-0">
         <span className="text-xs tracking-widest font-semibold text-slate-400">
           {sourceType === "LIVE" ? "LIVE SATELLITE SAR VIEW" : sourceType === "DEMO" ? "DEMO / SIMULATED SAR VIEW" : "SATELLITE / IMAGE INVESTIGATION VIEW"}
         </span>
@@ -163,52 +167,63 @@ export function ImageViewer({ detection, image, incident }: ImageViewerProps) {
         </div>
       </div>
 
-      {/* Image Viewer */}
-      <div className="relative" style={{ aspectRatio: "16/10" }} ref={containerRef}>
-        <div 
-          ref={containerRef} 
-          className="relative w-full h-full bg-gradient-to-br from-slate-800 via-slate-900 to-black overflow-hidden"
-          style={containerStyle}
-          onWheel={handleWheel}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={() => setIsDragging(false)}
-        >
-          {/* Image */}
+      {/* Image Viewer - explicit responsive height so SAR preview is always visible (no h-full collapse) */}
+      <div
+        ref={containerRef}
+        className="relative w-full h-[360px] lg:h-[420px] min-h-[300px] bg-gradient-to-br from-slate-800 via-slate-900 to-black overflow-hidden flex items-center justify-center shrink-0"
+        onWheel={handleWheel}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={() => setIsDragging(false)}
+      >
+          {/* Image - SAR preview is 512x512 PNG from Process API; use w-full h-full with contain and brightness lift so dark ocean is visible not pure black */}
           {(isLive && image?.url?.startsWith("data:image")) ? (
             <img
               ref={imageRef}
-              src={image.url}
+              src={getImageSrc(image.url)}
               alt="LIVE SAR preview"
-              className="w-full h-full object-contain"
-              style={{ ...imageStyle, opacity: 0.9 }}
+              className="w-full h-full object-contain p-2"
+              style={{ ...imageStyle, opacity: 1, filter: "brightness(1.35) contrast(1.18) saturate(1.05)", imageRendering: "auto" as any }}
               onLoad={() => handleFit()}
+              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
             />
           ) : isLive && image?.url?.startsWith("http") ? (
             <img
               ref={imageRef}
-              src={image.url}
+              src={getImageSrc(image.url)}
               alt="LIVE SAR preview"
-              className="w-full h-full object-contain"
-              style={{ ...imageStyle, opacity: 0.8 }}
+              className="w-full h-full object-contain p-2"
+              style={{ ...imageStyle, opacity: 0.95, filter: "brightness(1.35) contrast(1.18)" }}
               onLoad={() => handleFit()}
             />
           ) : image?.url ? (
             <img
               ref={imageRef}
-              src={image.url}
+              src={getImageSrc(image.url)}
               alt={isLive ? "LIVE SAR preview" : "SAR preview"}
-              className="w-full h-full object-contain"
-              style={imageStyle}
+              className="w-full h-full object-contain p-2"
+              style={{ ...imageStyle, filter: isLive ? "brightness(1.35) contrast(1.18)" : "brightness(1.1) contrast(1.05)" }}
               onLoad={() => handleFit()}
+              onError={(e) => {
+                // If SAR preview endpoint returned JSON error (502), show fallback text instead of black square
+                const el = e.currentTarget as HTMLImageElement;
+                el.style.display = 'none';
+                const parent = el.parentElement;
+                if (parent && !parent.querySelector('.sar-error-fallback')) {
+                  const div = document.createElement('div');
+                  div.className = 'sar-error-fallback absolute inset-0 flex flex-col items-center justify-center p-6 text-center';
+                  div.innerHTML = '<div class="text-amber-300 text-xs font-mono">SAR preview failed to load — check Network tab for /api/incidents/.../sar-preview/current?v=4 (502 = Process API). DEMO image will show if LIVE not configured.</div>';
+                  parent.appendChild(div);
+                }
+              }}
             />
           ) : (
             <div className="absolute inset-0 opacity-40" style={{ background: `radial-gradient(ellipse at 50% 40%, rgba(6,182,212,0.15), transparent 60%), repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 3px)` }} />
           )}
 
-          {/* Zoom controls */}
-          <div className="absolute bottom-3 right-3 flex items-center gap-1 p-1 bg-black/60 rounded-lg border border-white/10">
+          {/* Zoom controls - single set, bottom-right */}
+          <div className="absolute bottom-3 right-3 flex items-center gap-1 p-1 bg-black/60 rounded-lg border border-white/10 z-10">
             <button
               onClick={handleZoomOut}
               disabled={scale <= MIN_SCALE}
@@ -240,9 +255,9 @@ export function ImageViewer({ detection, image, incident }: ImageViewerProps) {
             </span>
           </div>
 
-          {/* Live metadata badge - moved to corner, not overlaid on image content */}
+          {/* Live metadata badge - top-left, compact, does not cover SAR core */}
           {isLive && liveMeta && (
-            <div className="absolute top-3 left-3 w-[85%] rounded-lg bg-black/70 border border-emerald-500/30 p-2 text-[10px] text-left space-y-1 pointer-events-none">
+            <div className="absolute top-3 left-3 max-w-[78%] rounded-lg bg-black/70 border border-emerald-500/30 p-2 text-[10px] text-left space-y-1 pointer-events-none z-10">
               <div>Provider: {live.provider}</div>
               <div>Satellite: {live.satellite}</div>
               <div>Scene: {live.productId}</div>
@@ -250,48 +265,14 @@ export function ImageViewer({ detection, image, incident }: ImageViewerProps) {
             </div>
           )}
 
-          {/* BBox markers */}
-          <div className="absolute top-3 left-3 text-[9px] text-white/60 bg-black/40 px-1.5 py-0.5 rounded border border-white/10">
+          {/* BBox markers - small, corners */}
+          <div className="absolute top-3 right-3 text-[9px] text-white/60 bg-black/40 px-1.5 py-0.5 rounded border border-white/10 z-10 hidden lg:block">
             {live ? `${live.aoi?.lat?.toFixed(1)}°N ${live.aoi?.lon?.toFixed(1)}°E` : "19.2°N 64.5°E"}
           </div>
-          <div className="absolute bottom-3 right-3 text-[9px] text-white/60 bg-black/40 px-1.5 py-0.5 rounded border border-white/10">
+          <div className="absolute bottom-3 left-3 text-[9px] text-white/60 bg-black/40 px-1.5 py-0.5 rounded border border-white/10 z-10">
             T+0 · {formatUtcTime(detection?.timestamp)}
           </div>
-        </div>
-
-        {/* Zoom controls */}
-        <div className="absolute bottom-3 right-3 flex items-center gap-1 p-1 bg-black/60 rounded-lg border border-white/10">
-          <button
-            onClick={() => setScale(s => Math.max(0.5, s - 0.25))}
-            disabled={scale <= 0.5}
-            className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed rounded transition-colors"
-            aria-label="Zoom out"
-            title="Zoom out"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
-          </button>
-          <button
-            onClick={() => setScale(1)}
-            className="px-2 py-1 text-[10px] text-white/70 hover:text-white hover:bg-white/10 rounded transition-colors"
-            aria-label="Reset zoom"
-            title="Reset zoom"
-          >
-            Fit
-          </button>
-          <button
-            onClick={() => setScale(s => Math.min(5, s + 0.25))}
-            disabled={scale >= 4}
-            className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed rounded transition-colors"
-            aria-label="Zoom in"
-            title="Zoom in"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-          </button>
-          <span className="text-[10px] text-white/60 px-1 font-mono">
-            {(scale * 100).toFixed(0)}%
-          </span>
-        </div>
-</div>
+      </div>
         <div className="grid grid-cols-3 gap-2 p-3 bg-slate-800/30 text-xs">
         <div className="rounded-lg bg-white/5 border border-white/5 p-2"><div className="text-slate-400 text-[10px]">CONFIDENCE</div><div className="font-bold text-cyan-300">{(confidence*100).toFixed(0)}%</div></div>
         <div className="rounded-lg bg-white/5 border border-white/5 p-2"><div className="text-slate-400 text-[10px]">AREA</div><div className="font-bold">{detection?.affectedAreaEstimate ?? 23}%</div></div>

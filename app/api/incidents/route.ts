@@ -139,10 +139,10 @@ export async function POST(req: NextRequest){
     }
     const liveLocation = liveMeta ? { lat: liveMeta.aoi.lat, lon: liveMeta.aoi.lon, label: `${region} · ${mode} Sentinel-1 ${liveMeta.satellite} ${liveMeta.productId.slice(0,18)}`, bbox: liveMeta.aoi.bbox, footprint: (liveMeta as any).footprint } as any : location;
     const now = new Date();
-    // For LIVE, previewUrl is already same-origin /api/incidents/[id]/sar-preview/[role] (never datahub $value)
+    // For LIVE, previewUrl is already same-origin /api/incidents/[id]/sar-preview/[role] (never datahub $value) - v=4 busts cache after evalscript brightening
     // For DEMO, previewUrl is local synthetic /demo/sar/... (already same-origin)
-    const primaryImageUrl = liveMeta ? (liveMeta.previewUrl || `/api/incidents/${id}/sar-preview/current`) : (body.imageUrl || "/demo/sar/demo-sar-current.png");
-    const previousImageUrl = previousMeta ? (previousMeta.previewUrl || `/api/incidents/${id}/sar-preview/previous`) : null;
+    const primaryImageUrl = liveMeta ? (liveMeta.previewUrl || `/api/incidents/${id}/sar-preview/current?v=4`) : (body.imageUrl || "/demo/sar/demo-sar-current.png");
+    const previousImageUrl = previousMeta ? (previousMeta.previewUrl || `/api/incidents/${id}/sar-preview/previous?v=4`) : null;
     const imageSourceType = liveMeta ? mode : (mode==="DEMO" ? "DEMO" : body.sourceImageId?.startsWith("DEMO") ? "DEMO" : "USER_UPLOAD");
     const primaryMetadata = liveMeta ? { ...serializeDates(detection) as any, liveObservation: liveMeta, previousObservation: previousMeta, mode } : serializeDates(detection) as any;
 

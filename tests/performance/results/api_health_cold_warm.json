@@ -9,5 +9,16 @@
     "cold_ms": 2190.463200000522,
     "warm_ms": 242.5753999996232,
     "status": 200
+  },
+  {
+    "timestamp": "2026-09-18T07:52:22.206400+00:00",
+    "environment": "local",
+    "test_name": "api_health_cold_warm",
+    "base_url": "http://localhost:3000",
+    "node_version": "",
+    "git_commit": "88cb79f",
+    "cold_ms": 2486.988900000142,
+    "warm_ms": 269.2562000011094,
+    "status": 200
   }
 ]

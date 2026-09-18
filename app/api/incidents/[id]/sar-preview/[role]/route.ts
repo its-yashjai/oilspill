@@ -119,10 +119,12 @@ export async function GET(
       status: 200,
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": "public, max-age=60, s-maxage=300",
+        // Bust cache after evalscript brightening - old dark PNGs were cached 60s in browser/CDN
+        "Cache-Control": "no-store, must-revalidate",
         "X-Preview-ProductId": productId,
         "X-Preview-Role": role,
         "X-Preview-AcquiredAt": acquiredAt,
+        "X-Preview-Version": "v4-fix-time-ms-bright",
       },
     });
   } catch (e: any) {

@@ -39,8 +39,9 @@ interface LiveWorldMapProps {
     bbox: [number, number, number, number];
     center: { lat: number; lon: number };
   };
-  viewMode: "before" | "after" | "split";
-  onViewModeChange: (mode: "before" | "after" | "split") => void;
+  // viewMode kept optional for backward compat but no longer used for satellite basemap - satellite imagery looks identical in BEFORE/AFTER, temporal comparison belongs to SAR IMAGE view when oil spill is detected
+  viewMode?: "before" | "after" | "split";
+  onViewModeChange?: (mode: "before" | "after" | "split") => void;
   onRegionChange?: (regionId: string) => void;
 }
 
@@ -85,7 +86,7 @@ export function LiveWorldMap({
   currentObservation,
   previousObservation,
   monitoringRegion,
-  viewMode,
+  viewMode = "after",
   onViewModeChange,
   onRegionChange,
 }: LiveWorldMapProps) {
@@ -97,8 +98,6 @@ export function LiveWorldMap({
   const [selectedRegion, setSelectedRegion] = useState(monitoringRegion.id);
   const [showRegionSelector, setShowRegionSelector] = useState(false);
   const [mapStyle, setMapStyle] = useState<"satellite" | "ocean">("satellite");
-  const splitDividerRef = useRef<HTMLDivElement>(null);
-  const [splitPosition, setSplitPosition] = useState(50);
 
   // Keep selectedRegion in sync when monitoringRegion prop changes (prevent stale)
   useEffect(() => { setSelectedRegion(monitoringRegion.id); }, [monitoringRegion.id]);
@@ -116,7 +115,9 @@ export function LiveWorldMap({
     return null;
   };
 
-  const SAR_OPACITY = 0.65;
+  const SAR_OPACITY = 0.42;
+  const [sarVisible, setSarVisible] = useState(true);
+  const [sarOpacity, setSarOpacity] = useState(0.42);
 
   const isValidBbox = (b: [number,number,number,number] | null): b is [number,number,number,number] => {
     if (!b || b.length !== 4) return false;
@@ -151,16 +152,22 @@ export function LiveWorldMap({
     const isSafeImageUrl = (url: string) => {
       if (!url) return false;
       if (url.startsWith("data:")) return true;
-      if (url.startsWith("/")) return true; // local synthetic DEMO
+      if (url.startsWith("/")) return true; // local synthetic DEMO or /api/incidents/.../sar-preview
       // Auth-required Copernicus URLs will fail CORS as image source; skip to keep basemap visible
       if (url.includes("datahub.creodias.eu") || url.includes("creodias") || url.includes("/odata/")) return false;
       // Allow http/https that are not auth-required (Esri tiles are raster source, not image)
       return url.startsWith("http");
     };
+    const bustCache = (url: string) => {
+      if (!url || !url.includes("/sar-preview")) return url;
+      if (url.includes("v=4")) return url;
+      return url.includes("?") ? `${url}&v=4` : `${url}?v=4`;
+    };
 
-    // Add current SAR overlay using true footprint/AOI, semi-transparent so basemap remains visible
+    // Satellite basemap is static Esri World Imagery — BEFORE/AFTER toggle is not useful for satellite tiles (they look identical).
+    // For the WORLD MAP we show only the CURRENT SAR footprint/overlay. Temporal BEFORE/AFTER comparison belongs to the SAR IMAGE VIEW below and only when an oil spill change is detected.
     if (currentObservation?.previewUrl) {
-      const url = currentObservation.previewUrl;
+      const url = bustCache(currentObservation.previewUrl);
       if (!isSafeImageUrl(url)) {
         console.warn("LiveWorldMap skipping current SAR overlay with auth-required URL (would block basemap):", url.slice(0, 100));
       } else {
@@ -182,7 +189,9 @@ export function LiveWorldMap({
               type: "raster",
               source: "current-sar",
               paint: {
-                "raster-opacity": viewMode === "before" && previousObservation?.previewUrl ? 0 : SAR_OPACITY,
+                "raster-opacity": sarVisible ? sarOpacity : 0,
+                "raster-contrast": 0.15,
+                "raster-saturation": 0.1,
               },
             });
             currentLayerId.current = "current-sar";
@@ -209,58 +218,6 @@ export function LiveWorldMap({
           } catch (e) { console.warn("current-sar add failed", e); }
         } else if (bbox && !isValidBbox(bbox)) {
           console.warn("current bbox invalid or antimeridian, skipping overlay", bbox);
-        }
-      }
-    }
-
-    // Add previous SAR overlay (same safe check)
-    if (previousObservation?.previewUrl) {
-      const purl = previousObservation.previewUrl;
-      if (!isSafeImageUrl(purl)) {
-        console.warn("LiveWorldMap skipping previous SAR overlay with auth-required URL:", purl.slice(0, 100));
-      } else {
-        const bbox = getFootprintBbox(previousObservation);
-        if (bbox && isValidBbox(bbox) && layerRequestId.current === reqId) {
-          try {
-            map.addSource("previous-sar", {
-              type: "image",
-              url: purl,
-              coordinates: [
-                [bbox[0], bbox[3]],
-                [bbox[2], bbox[3]],
-                [bbox[2], bbox[1]],
-                [bbox[0], bbox[1]],
-              ],
-            });
-            map.addLayer({
-              id: "previous-sar",
-              type: "raster",
-              source: "previous-sar",
-              paint: {
-                "raster-opacity": viewMode === "after" ? 0 : SAR_OPACITY,
-              },
-            });
-            previousLayerId.current = "previous-sar";
-            const geom = (previousObservation as any).footprint?.geometry;
-            if (geom && geom.type === "Polygon") {
-              map.addSource("previous-footprint", { type: "geojson", data: { type: "Feature", geometry: geom, properties: {} } as any });
-            } else {
-              map.addSource("previous-footprint", {
-                type: "geojson",
-                data: {
-                  type: "Feature",
-                  geometry: { type: "Polygon", coordinates: [[[bbox[0], bbox[1]],[bbox[2], bbox[1]],[bbox[2], bbox[3]],[bbox[0], bbox[3]],[bbox[0], bbox[1]]]] },
-                  properties: {},
-                } as any,
-              });
-            }
-            map.addLayer({
-              id: "previous-footprint",
-              type: "line",
-              source: "previous-footprint",
-              paint: { "line-color": "#f59e0b", "line-width": 1.2, "line-opacity": 0.85, "line-dasharray": [2,2] },
-            });
-          } catch (e) { console.warn("previous-sar add failed", e); }
         }
       }
     }
@@ -292,7 +249,7 @@ export function LiveWorldMap({
         });
       } catch {}
     }
-  }, [currentObservation, previousObservation, viewMode, splitPosition, monitoringRegion]);
+  }, [currentObservation, monitoringRegion]);
 
   const addMonitoringRegionPolygon = useCallback(() => {
     const map = mapRef.current;
@@ -480,13 +437,12 @@ export function LiveWorldMap({
     return () => clearTimeout(t);
   }, [mapLoaded, addSARLayers, addMonitoringRegionPolygon]);
 
-  // Update SAR layers when observations or viewMode change (async, without blocking map interaction)
-  // Keep map camera stable for BEFORE/AFTER/SPLIT (do not change camera)
+  // Update SAR overlay when current observation changes (satellite basemap is static, no BEFORE/AFTER toggle)
   useEffect(() => {
     if (!mapLoaded) return;
     const t = setTimeout(() => addSARLayers(), 0);
     return () => clearTimeout(t);
-  }, [currentObservation, previousObservation, viewMode, mapLoaded, addSARLayers]);
+  }, [currentObservation, mapLoaded, addSARLayers]);
 
   // Update monitoring region polygon when region changes without recreating map (preserve pan/zoom)
   useEffect(() => {
@@ -494,6 +450,16 @@ export function LiveWorldMap({
     addMonitoringRegionPolygon();
     // Do not auto-fit on region change unless user clicks Fit — preserves WORLD/REGION context
   }, [monitoringRegion, mapLoaded, addMonitoringRegionPolygon]);
+
+  // Keep SAR overlay opacity in sync when user toggles visibility or slider (so black patch can be faded/hidden to inspect basemap)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    try {
+      if (map.getLayer("current-sar")) map.setPaintProperty("current-sar", "raster-opacity", sarVisible ? sarOpacity : 0);
+      if (map.getLayer("current-footprint")) map.setPaintProperty("current-footprint", "line-opacity", sarVisible ? 0.9 : 0.15);
+    } catch {}
+  }, [sarVisible, sarOpacity]);
 
   const handleRegionChange = (regionId: string) => {
     const region = SEA_PRESETS.find(r => r.id === regionId);
@@ -504,39 +470,13 @@ export function LiveWorldMap({
     setShowRegionSelector(false);
   };
 
-  const handleSplitMove = (e: MouseEvent) => {
-    if (!splitDividerRef.current) return;
-    const rect = splitDividerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    setSplitPosition(percent);
-  };
-
-  const handleSplitEnd = () => {
-    window.removeEventListener("mousemove", handleSplitMove as any);
-    window.removeEventListener("mouseup", handleSplitEnd);
-  };
-
-  // Sync view mode with layers
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    if (map.getLayer("current-sar")) {
-      map.setPaintProperty("current-sar", "raster-opacity", viewMode === "before" ? 0 : 1);
-    }
-    if (map.getLayer("previous-sar")) {
-      map.setPaintProperty("previous-sar", "raster-opacity", viewMode === "after" ? 0 : 1);
-    }
-  }, [viewMode]);
-
   const handleRegionSelect = (regionId: string) => {
     handleRegionChange(regionId);
   };
 
   return (
-    <div className="relative w-full h-full bg-slate-950">
-      <div ref={mapContainerRef} className="absolute inset-0" />
+    <div className="relative w-full h-[380px] lg:h-[520px] min-h-[320px] bg-slate-950 overflow-hidden min-h-0 block shrink-0">
+      <div ref={mapContainerRef} className="absolute inset-0 w-full h-full min-h-0" />
 
       {/* Region Selector Dropdown */}
       <div className="absolute top-4 left-4 z-20">
@@ -639,47 +579,36 @@ export function LiveWorldMap({
           </Button>
         </div>
 
-        {/* View Mode Controls */}
-        <div className="flex gap-1 bg-slate-900/80 backdrop-blur border border-white/10 rounded-lg p-1">
-          {(["before", "after", "split"] as const).map(mode => (
-            <Button
-              key={mode}
-              variant={viewMode === mode ? "default" : "ghost"}
-              size="sm"
-              className="px-3 py-1.5 text-xs"
-              onClick={() => onViewModeChange(mode)}
-            >
-              {mode.toUpperCase()}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      {/* Split View Divider */}
-      {viewMode === "split" && (
-        <div
-          ref={splitDividerRef}
-          className="absolute inset-y-0 w-1 bg-emerald-500/50 cursor-col-resize z-10 flex items-center justify-center"
-          onMouseDown={(e) => {
-            e.preventDefault();
-            window.addEventListener("mousemove", handleSplitMove as any);
-            window.addEventListener("mouseup", handleSplitEnd);
-          }}
-          style={{ left: `${splitPosition}%` }}
-        >
-          <div className="h-8 w-px bg-emerald-500" />
-          <div className="absolute -left-16 top-1/2 -translate-y-1/2 text-[10px] text-emerald-300 font-mono">
-            {Math.round(splitPosition)}%
+        {currentObservation?.previewUrl && (
+          <div className="flex flex-col gap-1.5 bg-slate-900/80 backdrop-blur border border-white/10 rounded-lg p-2 min-w-[160px]">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11px] font-medium text-slate-200">SAR Overlay</span>
+              <button
+                onClick={() => setSarVisible(v => !v)}
+                className={`text-[10px] px-2 py-0.5 rounded-full border transition-colors ${sarVisible ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30" : "bg-white/5 text-slate-400 border-white/10"}`}
+              >
+                {sarVisible ? "Visible" : "Hidden"}
+              </button>
+            </div>
+            {sarVisible && (
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-slate-500">Opacity</span>
+                <input
+                  type="range"
+                  min={0.1}
+                  max={0.85}
+                  step={0.05}
+                  value={sarOpacity}
+                  onChange={e => setSarOpacity(parseFloat(e.target.value))}
+                  className="flex-1 accent-cyan-500 h-1"
+                />
+                <span className="text-[10px] font-mono text-slate-400 w-7 text-right">{Math.round(sarOpacity*100)}%</span>
+              </div>
+            )}
+            <div className="text-[10px] leading-tight text-slate-500">Black patch blocks view? Hide or lower opacity to inspect Esri basemap. SAR is semi-transparent so coastline stays visible.</div>
           </div>
-        </div>
-      )}
-
-      {/* Banner for missing previous - clearly instead of duplicating */}
-      {(viewMode === "before" || viewMode === "split") && !previousObservation?.previewUrl && (
-        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 bg-amber-500/20 border border-amber-500/30 rounded-lg px-3 py-1.5 text-xs text-amber-300 backdrop-blur">
-          Previous scene unavailable — temporal comparison not possible. Showing current only.
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Metadata Panel */}
       <div className="absolute bottom-4 left-4 z-20 max-w-xs">
@@ -743,24 +672,6 @@ export function LiveWorldMap({
         </div>
       </div>
 
-      {/* View Mode Toggle - Mobile */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 lg:hidden">
-        <div className="flex gap-1 bg-slate-900/90 backdrop-blur border border-white/10 rounded-lg p-1">
-          {(["before", "after", "split"] as const).map(mode => (
-            <button
-              key={mode}
-              onClick={() => onViewModeChange(mode)}
-              className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-                viewMode === mode
-                  ? "bg-emerald-500/20 text-emerald-300"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              {mode.toUpperCase()}
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

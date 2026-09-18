@@ -54,5 +54,61 @@
     "sample_errors": [],
     "path": "/api/incidents",
     "scenario": "incidents_list_5c_20r"
+  },
+  {
+    "timestamp": "2026-09-18T07:52:42.627761+00:00",
+    "environment": "local",
+    "test_name": "api_incidents_list",
+    "base_url": "http://localhost:3000",
+    "node_version": "",
+    "git_commit": "88cb79f",
+    "count": 15,
+    "p50": 497.2549000012805,
+    "p95": 543.7233299999207,
+    "p99": 549.4885860003706,
+    "min": 483.8142999979027,
+    "max": 550.929900000483,
+    "avg": 507.1389400002469,
+    "stdev": 21.687109400596434,
+    "concurrency": 3,
+    "total_requests": 15,
+    "successes": 15,
+    "failures": 0,
+    "wall_time_s": 3.642482100000052,
+    "throughput_rps": 4.118071026347606,
+    "status_counts": {
+      "200": 15
+    },
+    "sample_errors": [],
+    "path": "/api/incidents",
+    "scenario": "incidents_list_3c_15r"
+  },
+  {
+    "timestamp": "2026-09-18T07:52:47.451375+00:00",
+    "environment": "local",
+    "test_name": "api_incidents_list",
+    "base_url": "http://localhost:3000",
+    "node_version": "",
+    "git_commit": "88cb79f",
+    "count": 20,
+    "p50": 510.2326500000345,
+    "p95": 667.2911850000675,
+    "p99": 726.8171969997638,
+    "min": 261.8828999984544,
+    "max": 741.698699999688,
+    "avg": 482.8459850001309,
+    "stdev": 146.2330011743331,
+    "concurrency": 5,
+    "total_requests": 20,
+    "successes": 20,
+    "failures": 0,
+    "wall_time_s": 4.662706399998569,
+    "throughput_rps": 4.289354354373704,
+    "status_counts": {
+      "200": 20
+    },
+    "sample_errors": [],
+    "path": "/api/incidents",
+    "scenario": "incidents_list_5c_20r"
   }
 ]
