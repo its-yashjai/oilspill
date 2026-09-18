@@ -435,11 +435,7 @@ export function LiveWorldMap({
             maxzoom: 19,
           } as any);
         }
-        // Ensure basemap is at bottom
-        try { if (map.getLayer("esri-satellite-basemap")) map.moveLayer("esri-satellite-basemap"); } catch {}
-        try { if (map.getLayer("satellite-basemap")) map.moveLayer("satellite-basemap"); } catch {}
-        // Ensure background is at very bottom
-        try { if (map.getLayer("background")) map.moveLayer("background"); } catch {}
+        // background and basemap already in correct bottom-to-top order from MAP_STYLE — no reordering needed
         console.log("LiveWorldMap basemap verified, sources:", Object.keys((map as any).getStyle()?.sources || {}), "layers:", (map as any).getStyle()?.layers?.map((l:any)=>l.id));
       } catch (err) {
         console.warn("LiveWorldMap basemap explicit add failed", err);

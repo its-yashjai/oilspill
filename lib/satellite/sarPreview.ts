@@ -113,8 +113,19 @@ export async function renderSarPreviewBytes(params: {
     return { buffer: cached.buffer, contentType: cached.contentType };
   }
 
-  // Use existing working evalscript from liveSentinel1Provider
-  const evalscript = `//VERSION=3\nfunction setup(){return{input:["VV","VH"],output:{bands:3, sampleType:"AUTO"}};}\nfunction evaluatePixel(s){ let v=Math.max(0,Math.min(1, (s.VV*2+0.5))); let h=Math.max(0,Math.min(1, (s.VH*2+0.5))); return [v, h, (v+h)/2];}`;
+  const evalscript = `//VERSION=3
+function setup(){return{input:["VV","VH"],output:{bands:3, sampleType:"AUTO"}};}
+function toDb(x){ return x > 0 ? 10*Math.log10(x) : -30; }
+function stretch(db){
+  // typical Sentinel-1 sea/land backscatter runs roughly -25dB to 0dB
+  return Math.max(0, Math.min(1, (db + 25) / 25));
+}
+function evaluatePixel(s){
+  let v = stretch(toDb(s.VV));
+  let h = stretch(toDb(s.VH));
+  let composite = (v * 0.7 + h * 0.3);
+  return [v, composite, h];
+}`;
   const toTime = new Date(new Date(acquiredAt).getTime() + 24 * 3600 * 1000).toISOString();
   const token = await getOAuthToken();
   const processBody = {
@@ -142,9 +153,15 @@ export async function renderSarPreviewBytes(params: {
   }
 
   const buf = Buffer.from(await pr.arrayBuffer());
-  if (buf.length < 5000) {
-    throw new Error(`Process API returned too small buffer: ${buf.length} bytes`);
-  }
+
+// Real validity check: correct PNG signature + reasonable minimum for a genuine (even low-contrast) 512x512 image.
+// Sentinel Hub returns a JSON error body (not a PNG) on real failures, so checking the PNG magic bytes
+// is a much more reliable failure signal than raw byte size.
+const isPng = buf.length > 8 && buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47;
+if (!isPng) {
+  const asText = buf.toString("utf8").slice(0, 500);
+  throw new Error(`Process API did not return a PNG (likely an error body): ${asText}`);
+}
 
   const result = { buffer: buf, contentType: "image/png" as string };
   // Cache
