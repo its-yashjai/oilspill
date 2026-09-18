@@ -1,0 +1,30 @@
+[
+  {
+    "timestamp": "2026-09-18T02:00:52.304167+00:00",
+    "environment": "local",
+    "test_name": "api_health_1c",
+    "base_url": "http://localhost:3001",
+    "node_version": "",
+    "git_commit": "fatal: Neede",
+    "count": 20,
+    "p50": 295.1205499994103,
+    "p95": 1057.6848399999562,
+    "p99": 1238.9515280000248,
+    "min": 256.81150000036723,
+    "max": 1284.2682000000423,
+    "avg": 439.63001000001896,
+    "stdev": 295.2549011617732,
+    "concurrency": 1,
+    "total_requests": 20,
+    "successes": 20,
+    "failures": 0,
+    "wall_time_s": 9.38270509999984,
+    "throughput_rps": 2.131581434867898,
+    "status_counts": {
+      "200": 20
+    },
+    "sample_errors": [],
+    "path": "/api/health",
+    "scenario": "health_1c_20r"
+  }
+]

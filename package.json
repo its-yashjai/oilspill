@@ -1,0 +1,49 @@
+{
+  "name": "bluesentinel",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "eslint",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx lib/db/migrate.ts",
+    "db:seed": "tsx lib/db/seed.ts"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "@moss-dev/moss-core": "^0.23.0",
+    "canvas": "^3.2.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "drizzle-orm": "^0.45.2",
+    "framer-motion": "^12.23.12",
+    "livekit-client": "^2.22.3",
+    "livekit-server-sdk": "^2.19.0",
+    "lucide-react": "^0.525.0",
+    "maplibre-gl": "^6.10.0",
+    "next": "^16.3.5",
+    "openai": "^5.12.0",
+    "postgres": "^3.4.9",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-map-gl": "^8.1.3",
+    "resend": "^6.0.0",
+    "tailwind-merge": "^3.5.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.4",
+    "eslint": "^9",
+    "eslint-config-next": "15.4.5",
+    "node-loader": "^2.1.0",
+    "tailwindcss": "^4.1.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5"
+  }
+}

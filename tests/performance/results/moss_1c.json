@@ -1,0 +1,32 @@
+[
+  {
+    "timestamp": "2026-09-18T02:01:19.540830+00:00",
+    "environment": "local",
+    "test_name": "moss_1c",
+    "base_url": "http://localhost:3001",
+    "node_version": "",
+    "git_commit": "fatal: Neede",
+    "count": 10,
+    "p50": 42.48585000004823,
+    "p95": 136.4383499995709,
+    "p99": 193.85870999960392,
+    "min": 26.93159999944328,
+    "max": 208.2137999996121,
+    "avg": 55.7240199998887,
+    "stdev": 51.303355250957736,
+    "concurrency": 1,
+    "total_requests": 10,
+    "successes": 10,
+    "failures": 0,
+    "wall_time_s": 1.0922897000000376,
+    "throughput_rps": 9.155080378401129,
+    "status_counts": {
+      "200": 10
+    },
+    "sample_errors": [],
+    "path": "/api/moss/search",
+    "query": "oil spill Arabian Sea SAR detection",
+    "scenario": "moss_1c_10r",
+    "moss_query": "oil spill Arabian Sea SAR detection"
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "timestamp": "2026-09-18T02:01:25.567959+00:00",
+    "environment": "local",
+    "test_name": "moss_varied_moss",
+    "base_url": "http://localhost:3001",
+    "node_version": "",
+    "git_commit": "fatal: Neede",
+    "count": 5,
+    "p50": 20.65,
+    "p95": 23.45,
+    "p99": 23.578,
+    "min": 5.83,
+    "max": 23.61,
+    "avg": 16.028,
+    "stdev": 7.823979550075523,
+    "type": "moss_retrieval_latency",
+    "note": "Moss retrieval latency separate from end-to-end"
+  }
+]

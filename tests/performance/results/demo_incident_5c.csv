@@ -1,0 +1,2 @@
+timestamp,environment,test_name,base_url,node_version,git_commit,count,p50,p95,p99,min,max,avg,stdev,concurrency,total_requests,successes,failures,wall_time_s,throughput_rps,warm_ms,path,note
+2026-09-18T02:02:45.280411+00:00,local,demo_incident_5c,http://localhost:3001,,fatal: Neede,10,6293.449900000269,6543.790490000038,6555.5811380001705,6159.519899999395,6558.528800000204,6312.750779999897,130.22416433532615,5,10,10,0,12.91142260000015,0.774507992635907,7986.933400000453,/api/incidents (DEMO),"Includes DEMO detection + persistence, no LIVE external call"

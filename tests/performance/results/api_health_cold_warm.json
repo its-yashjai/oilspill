@@ -1,0 +1,13 @@
+[
+  {
+    "timestamp": "2026-09-18T02:00:42.828285+00:00",
+    "environment": "local",
+    "test_name": "api_health_cold_warm",
+    "base_url": "http://localhost:3001",
+    "node_version": "",
+    "git_commit": "fatal: Neede",
+    "cold_ms": 2190.463200000522,
+    "warm_ms": 242.5753999996232,
+    "status": 200
+  }
+]

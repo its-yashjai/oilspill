@@ -1,0 +1,16 @@
+[
+  {
+    "timestamp": "2026-09-18T02:06:31.792011+00:00",
+    "environment": "local",
+    "test_name": "agent_pipeline_single",
+    "base_url": "http://localhost:3001",
+    "node_version": "",
+    "git_commit": "fatal: Neede",
+    "incident_id": "perf-agent-b2f9539a",
+    "initial_response_ms": 6795.90349999944,
+    "historical_done_ms": null,
+    "investigation_done_ms": 17629.59620000038,
+    "evidence_done_ms": 64558.29730000005,
+    "total_pipeline_ms": 64558.29730000005
+  }
+]

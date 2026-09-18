@@ -1,0 +1,2 @@
+timestamp,environment,test_name,base_url,node_version,git_commit,count,p50,p95,p99,min,max,avg,stdev,type
+2026-09-18T02:02:45.127394+00:00,local,demo_detection_latency_5c,http://localhost:3001,,fatal: Neede,10,161.5,183.75,185.54999999999998,126.0,186.0,157.3,21.936499264923746,detection_processingLatencyMs

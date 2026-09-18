@@ -1,0 +1,2 @@
+timestamp,environment,test_name,base_url,node_version,git_commit,cold_ms,warm_ms,status
+2026-09-18T02:00:42.828285+00:00,local,api_health_cold_warm,http://localhost:3001,,fatal: Neede,2190.463200000522,242.5753999996232,200

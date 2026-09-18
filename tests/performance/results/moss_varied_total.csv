@@ -1,0 +1,2 @@
+timestamp,environment,test_name,base_url,node_version,git_commit,count,p50,p95,p99,min,max,avg,stdev,type
+2026-09-18T02:01:25.460515+00:00,local,moss_varied_total,http://localhost:3001,,fatal: Neede,5,37.75539999969624,47.76936000034766,49.38211200056685,21.990300000652496,49.785300000621646,34.76004000003741,10.258877440007852,total_api_latency

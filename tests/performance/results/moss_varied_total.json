@@ -1,0 +1,19 @@
+[
+  {
+    "timestamp": "2026-09-18T02:01:25.460515+00:00",
+    "environment": "local",
+    "test_name": "moss_varied_total",
+    "base_url": "http://localhost:3001",
+    "node_version": "",
+    "git_commit": "fatal: Neede",
+    "count": 5,
+    "p50": 37.75539999969624,
+    "p95": 47.76936000034766,
+    "p99": 49.38211200056685,
+    "min": 21.990300000652496,
+    "max": 49.785300000621646,
+    "avg": 34.76004000003741,
+    "stdev": 10.258877440007852,
+    "type": "total_api_latency"
+  }
+]

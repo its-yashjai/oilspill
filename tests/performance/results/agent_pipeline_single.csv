@@ -1,0 +1,2 @@
+timestamp,environment,test_name,base_url,node_version,git_commit,incident_id,initial_response_ms,historical_done_ms,investigation_done_ms,evidence_done_ms,total_pipeline_ms
+2026-09-18T02:06:31.792011+00:00,local,agent_pipeline_single,http://localhost:3001,,fatal: Neede,perf-agent-b2f9539a,6795.90349999944,,17629.59620000038,64558.29730000005,64558.29730000005

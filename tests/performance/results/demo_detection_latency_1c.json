@@ -1,0 +1,19 @@
+[
+  {
+    "timestamp": "2026-09-18T02:02:22.490821+00:00",
+    "environment": "local",
+    "test_name": "demo_detection_latency_1c",
+    "base_url": "http://localhost:3001",
+    "node_version": "",
+    "git_commit": "fatal: Neede",
+    "count": 5,
+    "p50": 178.0,
+    "p95": 185.79999999999998,
+    "p99": 185.96,
+    "min": 129.0,
+    "max": 186.0,
+    "avg": 166.4,
+    "stdev": 21.987269043698902,
+    "type": "detection_processingLatencyMs"
+  }
+]

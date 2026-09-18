@@ -1,0 +1,30 @@
+[
+  {
+    "timestamp": "2026-09-18T02:01:02.226293+00:00",
+    "environment": "local",
+    "test_name": "api_health_8c",
+    "base_url": "http://localhost:3001",
+    "node_version": "",
+    "git_commit": "fatal: Neede",
+    "count": 40,
+    "p50": 335.56094999994457,
+    "p95": 2776.2370900000406,
+    "p99": 2824.2756970004666,
+    "min": 256.79719999970985,
+    "max": 2838.174400000753,
+    "avg": 565.154035000046,
+    "stdev": 651.0529251434316,
+    "concurrency": 8,
+    "total_requests": 40,
+    "successes": 40,
+    "failures": 0,
+    "wall_time_s": 4.9414802999999665,
+    "throughput_rps": 8.094740355435652,
+    "status_counts": {
+      "200": 40
+    },
+    "sample_errors": [],
+    "path": "/api/health",
+    "scenario": "health_8c_40r"
+  }
+]

@@ -1,0 +1,27 @@
+[
+  {
+    "timestamp": "2026-09-18T02:02:45.280411+00:00",
+    "environment": "local",
+    "test_name": "demo_incident_5c",
+    "base_url": "http://localhost:3001",
+    "node_version": "",
+    "git_commit": "fatal: Neede",
+    "count": 10,
+    "p50": 6293.449900000269,
+    "p95": 6543.790490000038,
+    "p99": 6555.5811380001705,
+    "min": 6159.519899999395,
+    "max": 6558.528800000204,
+    "avg": 6312.750779999897,
+    "stdev": 130.22416433532615,
+    "concurrency": 5,
+    "total_requests": 10,
+    "successes": 10,
+    "failures": 0,
+    "wall_time_s": 12.91142260000015,
+    "throughput_rps": 0.774507992635907,
+    "warm_ms": 7986.933400000453,
+    "path": "/api/incidents (DEMO)",
+    "note": "Includes DEMO detection + persistence, no LIVE external call"
+  }
+]

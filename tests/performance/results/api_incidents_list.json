@@ -1,0 +1,58 @@
+[
+  {
+    "timestamp": "2026-09-18T02:01:05.565682+00:00",
+    "environment": "local",
+    "test_name": "api_incidents_list",
+    "base_url": "http://localhost:3001",
+    "node_version": "",
+    "git_commit": "fatal: Neede",
+    "count": 15,
+    "p50": 365.7832999997481,
+    "p95": 442.3596899994663,
+    "p99": 462.5069779994737,
+    "min": 266.91290000053414,
+    "max": 467.5437999994756,
+    "avg": 350.5126733332266,
+    "stdev": 59.705482523807056,
+    "concurrency": 3,
+    "total_requests": 15,
+    "successes": 15,
+    "failures": 0,
+    "wall_time_s": 2.974802300000192,
+    "throughput_rps": 5.042351890073176,
+    "status_counts": {
+      "200": 15
+    },
+    "sample_errors": [],
+    "path": "/api/incidents",
+    "scenario": "incidents_list_3c_15r"
+  },
+  {
+    "timestamp": "2026-09-18T02:01:08.089287+00:00",
+    "environment": "local",
+    "test_name": "api_incidents_list",
+    "base_url": "http://localhost:3001",
+    "node_version": "",
+    "git_commit": "fatal: Neede",
+    "count": 20,
+    "p50": 307.56479999990916,
+    "p95": 663.2878949999849,
+    "p99": 666.1742989998947,
+    "min": 255.29929999993328,
+    "max": 666.8958999998722,
+    "avg": 374.5592449999094,
+    "stdev": 143.4355290718576,
+    "concurrency": 5,
+    "total_requests": 20,
+    "successes": 20,
+    "failures": 0,
+    "wall_time_s": 2.3733032999998613,
+    "throughput_rps": 8.427072932482405,
+    "status_counts": {
+      "200": 20
+    },
+    "sample_errors": [],
+    "path": "/api/incidents",
+    "scenario": "incidents_list_5c_20r"
+  }
+]
